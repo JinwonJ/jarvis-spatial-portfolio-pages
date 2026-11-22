@@ -1,4 +1,5 @@
 (()=>{
+  const backgroundSpeed=1.4;
   const minimal=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const overlay=document.getElementById('bootSequence');
   const bootCanvas=document.createElement('canvas');bootCanvas.className='bootVolume';bootCanvas.setAttribute('aria-hidden','true');overlay?.prepend(bootCanvas);
@@ -31,9 +32,9 @@
     for(let i=0;i<7;i++){const y=horizon+Math.pow(i/6,2)*(innerHeight-horizon);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(innerWidth,y);ctx.stroke()}
   }
   function drawScene(dt,time){const sceneZoom=view.z*(typeof cameraDolly==='function'?cameraDolly():1);const ctx=fit(scene),cx=innerWidth/2,cy=innerHeight/2;const speed=Math.min(1,Math.hypot(rig.vx,rig.vy)*view.z/1000);pulse=Math.max(0,pulse-dt*.75);const energy=Math.max(speed,pulse*.65);
-    if(typeof cityScene!=='undefined')cityScene.draw(ctx,dt,energy,time);
+    if(typeof cityScene!=='undefined')cityScene.draw(ctx,dt*backgroundSpeed,energy,time*backgroundSpeed);
     const parallaxX=((view.x*.22)%3200+3200)%3200,parallaxY=((view.y*.22)%2200+2200)%2200;
-    for(const s of stars){if(!minimal)s.z-=dt*(14+energy*150);if(s.z<40)s.z+=1700;const k=650/(s.z+350),x=((((s.x-parallaxX)+1600)%3200+3200)%3200-1600)*k+cx,y=((((s.y-parallaxY)+1100)%2200+2200)%2200-1100)*k+cy;const trail=minimal?0:energy*12*k;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+rig.vx*view.z*.0008*k+trail*(x-cx)/innerWidth,y+rig.vy*view.z*.0008*k+trail*(y-cy)/innerHeight);ctx.strokeStyle=`rgba(113,239,223,${.1+k*.4})`;ctx.lineWidth=Math.max(.5,k);ctx.stroke()}
+    for(const s of stars){if(!minimal)s.z-=dt*backgroundSpeed*(14+energy*150);if(s.z<40)s.z+=1700;const k=650/(s.z+350),x=((((s.x-parallaxX)+1600)%3200+3200)%3200-1600)*k+cx,y=((((s.y-parallaxY)+1100)%2200+2200)%2200-1100)*k+cy;const trail=minimal?0:energy*12*k;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+rig.vx*view.z*.0008*k+trail*(x-cx)/innerWidth,y+rig.vy*view.z*.0008*k+trail*(y-cy)/innerHeight);ctx.strokeStyle=`rgba(113,239,223,${.1+k*.4})`;ctx.lineWidth=Math.max(.5,k);ctx.stroke()}
     if(typeof cityScene==='undefined'){ const horizon=innerHeight*.58;ctx.strokeStyle='#2c757b30';ctx.lineWidth=.7;const scroll=((view.x*.05)%80+80)%80;
     for(let i=-12;i<=12;i++){ctx.beginPath();ctx.moveTo(cx+(i*80-scroll)*.2,horizon);ctx.lineTo(cx+(i*80-scroll)*2.2,innerHeight);ctx.stroke()}
     for(let i=0;i<8;i++){const f=(i+((view.y*.001)%1+1)%1)/8;const y=horizon+f*f*(innerHeight-horizon);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(innerWidth,y);ctx.stroke()}
