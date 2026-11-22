@@ -1,10 +1,9 @@
-Original procedural sound design — J.A.R.V.I.S. Spatial Portfolio
+J.A.R.V.I.S. Spatial Portfolio — audio origins
 
-The intro and ambient music are synthesized at runtime from oscillator tones,
-project-defined pitch/timing sequences, gain envelopes, filters and delay.
-No external music file, third-party audio recording, film soundtrack, character
-voice recording or sampled sound library is bundled or requested by this system.
+Music: Signal to Noise by Scott Buckley, CC BY 4.0.
+See Scott-Buckley.txt for attribution, sources and license.
 
+Activation electronic effects are original procedural synthesis from oscillator
+tones, project-defined pitch/timing sequences, envelopes, filters and delay.
+No Marvel soundtrack, character voice recording or film samples are used.
 Source: src/engine/audio.js
-This notice documents the origin of the sound design. It does not change the
-licenses of the application's fonts, React, Vite or other software dependencies.
