@@ -4,18 +4,18 @@ const cityScene=(()=>{
   const random=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
   const blocks=[];let distance=0;
   for(let row=0;row<13;row++)for(let lane=0;lane<10;lane++){
-    const width=110+random()*90,depth=120+random()*90,height=70+random()*180+(random()>.85?180:0);
+    const width=110+random()*90,depth=120+random()*90,height=40+random()*105+(random()>.88?95:0);
     blocks.push({x:(lane-4.5)*280+random()*20,z:100+row*300+random()*30,width,depth,height,seed:random()*1000,spire:random()>.7,warm:random()>.8});
   }
   function draw(ctx,dt,energy,time){
     const reducedCity=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const advance=reducedCity?0:dt*(18+energy*35);distance+=advance;
     const width=innerWidth,height=innerHeight,horizon=height*.58;
-    const lens=Math.min(width*1.2,1850)*Math.max(.72,Math.min(1.35,Math.pow(Math.max(view.z,.0001),.13)));
+    const lens=Math.min(width*1.65,2300)*Math.max(.72,Math.min(1.35,Math.pow(Math.max(view.z,.0001),.13)));
     const shiftX=Math.sin(view.x*.0005)*190,shiftY=Math.sin(view.y*.00045)*65;
-    const yaw=.48+Math.sin(time*.018)*.04+Math.sin(view.x*.0004)*.08;
-    const cx=width/2,cy=height*.61-shiftY;
-    function project(x,y,z){const dx=x-shiftX,dz=z-2000,rx=dx*Math.cos(yaw)-dz*Math.sin(yaw),rz=dx*Math.sin(yaw)+dz*Math.cos(yaw);const depth=4400+rz*Math.sin(.92)-y*Math.cos(.92),k=lens/Math.max(700,depth);return{x:cx+rx*k,y:cy+(rz*Math.cos(.92)-y*Math.sin(.92))*k,k,depth}}
+    const yaw=.16+Math.sin(time*.018)*.025+Math.sin(view.x*.0004)*.08;
+    const cx=width/2,cy=height*.68-shiftY;
+    function project(x,y,z){const dx=x-shiftX,dz=z-2000,rx=dx*Math.cos(yaw)-dz*Math.sin(yaw),rz=dx*Math.sin(yaw)+dz*Math.cos(yaw);const depth=5100+rz*Math.sin(1.20)-y*Math.cos(1.20),k=lens/Math.max(700,depth);return{x:cx+rx*k,y:cy+(-rz*Math.cos(1.20)-y*Math.sin(1.20))*k,k,depth}}
     function face(points,fill,edge){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=edge;ctx.lineWidth=.65;ctx.stroke()}
     const haze=ctx.createRadialGradient(cx,cy,10,cx,cy,width*.7);haze.addColorStop(0,'#1e68642b');haze.addColorStop(.45,'#134c5513');haze.addColorStop(1,'#06141a00');ctx.fillStyle=haze;ctx.fillRect(0,0,width,height);
     // A visible ground plane, street blocks and shadows anchor every building.
