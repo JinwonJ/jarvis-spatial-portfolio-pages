@@ -4,6 +4,14 @@ const rig={vx:0,vy:0,vz:0,last:0};
 function editingTarget(node){return node instanceof Element&&Boolean(node.closest('input,textarea,[contenteditable="true"]'))}
 document.addEventListener('dragstart',event=>{if(!editingTarget(event.target))event.preventDefault()});
 document.addEventListener('selectstart',event=>{if(!editingTarget(event.target))event.preventDefault()});
+document.addEventListener('selectionchange',()=>{
+  const selection=window.getSelection();
+  if(selection&&!selection.isCollapsed&&!editingTarget(document.activeElement))selection.removeAllRanges();
+});
+document.addEventListener('copy',event=>{if(!editingTarget(document.activeElement))event.preventDefault()},true);
+document.addEventListener('keydown',event=>{
+  if(!editingTarget(event.target)&&(event.ctrlKey||event.metaKey)&&['a','c','x'].includes(event.key.toLowerCase()))event.preventDefault();
+},true);
 $('#viewport').addEventListener('pointerdown',event=>{
   if(event.pointerType==='mouse'&&!event.target.closest('button,input,textarea,a,[contenteditable="true"]'))event.preventDefault();
 });
