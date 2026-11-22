@@ -1,0 +1,10 @@
+Original procedural sound design — J.A.R.V.I.S. Spatial Portfolio
+
+The intro and ambient music are synthesized at runtime from oscillator tones,
+project-defined pitch/timing sequences, gain envelopes, filters and delay.
+No external music file, third-party audio recording, film soundtrack, character
+voice recording or sampled sound library is bundled or requested by this system.
+
+Source: src/engine/audio.js
+This notice documents the origin of the sound design. It does not change the
+licenses of the application's fonts, React, Vite or other software dependencies.
