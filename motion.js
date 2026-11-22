@@ -1,5 +1,12 @@
 // Time-based, critically damped camera rig shared by every input method.
 const rig={vx:0,vy:0,vz:0,last:0};
+// Disable native text/image/link dragging on the HUD, preserving form editing.
+function editingTarget(node){return node instanceof Element&&Boolean(node.closest('input,textarea,[contenteditable="true"]'))}
+document.addEventListener('dragstart',event=>{if(!editingTarget(event.target))event.preventDefault()});
+document.addEventListener('selectstart',event=>{if(!editingTarget(event.target))event.preventDefault()});
+$('#viewport').addEventListener('pointerdown',event=>{
+  if(event.pointerType==='mouse'&&!event.target.closest('button,input,textarea,a,[contenteditable="true"]'))event.preventDefault();
+});
 function springAxis(position,velocity,destination,dt,omega=3.8){
   const offset=position-destination,impulse=velocity+omega*offset,decay=Math.exp(-omega*dt);
   return [destination+(offset+impulse*dt)*decay,(velocity-omega*impulse*dt)*decay];
