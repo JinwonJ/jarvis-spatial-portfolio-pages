@@ -28,7 +28,7 @@ animateWorld=function(now=performance.now()){
   const tiltX=reduced?0:Math.max(-1.8,Math.min(1.8,rig.vy*.003));
   const tiltY=reduced?0:Math.max(-2.2,Math.min(2.2,-rig.vx*.003));
   $('#world').style.transform=`perspective(1600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${-view.x*view.z}px,${-view.y*view.z}px) scale(${view.z})`;
-  $('#space').style.transform=`translate(${-view.x*.028}px,${-view.y*.028}px) scale(1.12)`;
+  $('#space').style.transform=`translate(${(-view.x*.028)%70}px,${(-view.y*.028)%70}px) scale(1.25)`;
   $('#worldCoords').textContent=`X ${Math.round(view.x).toString().padStart(4,' ')} / Y ${Math.round(view.y).toString().padStart(4,' ')} / Z ${Math.round(view.z*100)}%`;
   requestAnimationFrame(animateWorld);
 };
@@ -36,14 +36,32 @@ animateWorld=function(now=performance.now()){
 navigate=function(direction){
   if(direction==='center'){go(0);return}
   overview=false;
-  target.x=Math.max(-1100,Math.min(1100,target.x+(direction==='left'?-600:direction==='right'?600:0)));
-  target.y=Math.max(-850,Math.min(850,target.y+(direction==='up'?-470:direction==='down'?470:0)));
+  const step=1/target.z;
+  const nextX=target.x+(direction==='left'?-500:direction==='right'?500:0)*step;
+  const nextY=target.y+(direction==='up'?-380:direction==='down'?380:0)*step;
+  if(Number.isFinite(nextX)&&Number.isFinite(nextY)){target.x=nextX;target.y=nextY}
   $('#signal').textContent='GLIDING / '+direction.toUpperCase();
   $('#chapter').textContent='SPATIAL EXPLORATION / FREE FLIGHT';
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   status(direction.toUpperCase()+' · 관성 이동 중 / “stop”으로 부드럽게 정지');
 };
 function brake(){target.x=view.x+rig.vx*.12;target.y=view.y+rig.vy*.12;target.z=view.z;status('STOP · 천천히 정지합니다.');$('#signal').textContent='STABILIZING'}
+function zoomBy(factor,clientX=innerWidth/2,clientY=innerHeight/2-4){
+  const next=target.z*factor;
+  // Keep only arithmetic validity checks; there is no product zoom limit.
+  if(!(next>0)||!Number.isFinite(next)||!Number.isFinite(1/next))return;
+  const offsetX=clientX-innerWidth/2,offsetY=clientY-(innerHeight/2-4);
+  const x=target.x+offsetX*(1/target.z-1/next),y=target.y+offsetY*(1/target.z-1/next);
+  if(!Number.isFinite(x)||!Number.isFinite(y))return;
+  target.x=x;target.y=y;target.z=next;overview=false;
+  $('#signal').textContent='INFINITE SPACE / ZOOM';
+}
+$('#viewport').addEventListener('wheel',event=>{
+  event.preventDefault();
+  const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?innerHeight:1);
+  // Normalize individual wheel events without bounding cumulative zoom.
+  zoomBy(Math.exp(-Math.max(-500,Math.min(500,delta))*.0015),event.clientX,event.clientY);
+},{passive:false});
 function command(transcript){
   const input=transcript.toLowerCase().replace(/[^a-z가-힣\s]/g,' ').trim();
   const matches=input.match(/\b(up|down|left|right|stop|center|home|overview|map|zoom in|zoom out)\b|업|다운|레프트|라이트|스톱|왼쪽|오른쪽|위로|아래로|중앙|전체|확대|축소/g);
@@ -53,8 +71,8 @@ function command(transcript){
     else if(/^(stop|스톱)$/.test(word))brake();
     else if(/^(center|home|중앙)$/.test(word))go(0);
     else if(/^(overview|map|전체)$/.test(word))map();
-    else if(/^(zoom in|확대)$/.test(word))target.z=Math.min(1.6,target.z*1.3);
-    else if(/^(zoom out|축소)$/.test(word))target.z=Math.max(.14,target.z/1.3);
+    else if(/^(zoom in|확대)$/.test(word))zoomBy(1.3);
+    else if(/^(zoom out|축소)$/.test(word))zoomBy(1/1.3);
   }
 }
 let voiceEpoch=0,restartTimer;
@@ -82,6 +100,7 @@ window.addEventListener('pagehide',()=>{micOn=false;voiceEpoch++;clearTimeout(re
 const voiceGuide=$('#guide');
 voiceGuide.innerHTML=voiceGuide.innerHTML.replace('“왼쪽”, “오른쪽”, “위로”, “아래로”, “전체”, “중앙”, “확대”, “축소” 또는 섹션 이름','영어로 “up”, “down”, “left”, “right”. “stop”으로 정지, “center”로 중앙, “overview”로 전체, “zoom in / zoom out”으로 확대·축소');
 voiceGuide.querySelector('.close').onclick=()=>voiceGuide.close();
+const zoomGuide=document.createElement('p');zoomGuide.textContent='휠을 위로 돌리면 확대, 아래로 돌리면 축소합니다. 마우스가 가리키는 곳을 중심으로 부드럽게 줌하며 이동·줌에 고정 범위 제한이 없습니다. 콘텐츠는 기존 다섯 패널이며, 멀어졌다면 “내 위치로”로 돌아올 수 있습니다.';voiceGuide.append(zoomGuide);
 const prompt=document.createElement('div');prompt.className='voiceCompass';prompt.innerHTML='<span>↑ UP</span><span>← LEFT <i>◎</i> RIGHT →</span><span>↓ DOWN</span><small>SAY IT. GLIDE THROUGH.</small>';$('#viewport').append(prompt);
 $('#home').textContent='내 위치로';
 $('#home').setAttribute('aria-label','내 위치로 돌아오기');
@@ -90,4 +109,4 @@ voiceGuide.innerHTML=voiceGuide.innerHTML.replace(/<p><b>드래그 \/ 터치<\/b
 voiceGuide.querySelector('.close').onclick=()=>voiceGuide.close();
 $('#viewport').addEventListener('keydown',e=>{if(e.key===' '&&e.target===$('#viewport')){e.preventDefault();brake()}});
 go(0);
-status('“up · down · left · right”로 공간을 부드럽게 탐색하세요. 음성 연결 후 사용할 수 있습니다.');
+status('휠로 자유롭게 확대·축소 · 키보드 방향키로 무제한 이동 · “내 위치로” 중앙 복귀');
