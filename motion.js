@@ -25,11 +25,12 @@ animateWorld=function(now=performance.now()){
     if(reduced){view[axis]=target[axis];rig['v'+axis]=0}
     else [view[axis],rig['v'+axis]]=springAxis(view[axis],rig['v'+axis],target[axis],dt,axis==='z'?3.3:3.8);
   }
+  const renderZoom=view.z*(typeof cameraDolly==='function'?cameraDolly(now):1);
   const tiltX=reduced?0:Math.max(-1.8,Math.min(1.8,rig.vy*.003));
   const tiltY=reduced?0:Math.max(-2.2,Math.min(2.2,-rig.vx*.003));
-  $('#world').style.transform=`perspective(1600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${-view.x*view.z}px,${-view.y*view.z}px) scale(${view.z})`;
+  $('#world').style.transform=`perspective(1600px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translate(${-view.x*renderZoom}px,${-view.y*renderZoom}px) scale(${renderZoom})`;
   $('#space').style.transform=`translate(${(-view.x*.028)%70}px,${(-view.y*.028)%70}px) scale(1.25)`;
-  $('#worldCoords').textContent=`X ${Math.round(view.x).toString().padStart(4,' ')} / Y ${Math.round(view.y).toString().padStart(4,' ')} / Z ${Math.round(view.z*100)}%`;
+  $('#worldCoords').textContent=`X ${Math.round(view.x).toString().padStart(4,' ')} / Y ${Math.round(view.y).toString().padStart(4,' ')} / Z ${Math.round(renderZoom*100)}%`;
   requestAnimationFrame(animateWorld);
 };
 // Direction commands pan freely; they do not select or rebuild any panel.

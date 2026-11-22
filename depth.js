@@ -30,14 +30,14 @@
     for(let i=-8;i<=8;i++){ctx.beginPath();ctx.moveTo(cx+i*22,horizon-35);ctx.lineTo(cx+i*180,innerHeight);ctx.stroke()}
     for(let i=0;i<7;i++){const y=horizon+Math.pow(i/6,2)*(innerHeight-horizon);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(innerWidth,y);ctx.stroke()}
   }
-  function drawScene(dt,time){const ctx=fit(scene),cx=innerWidth/2,cy=innerHeight/2;const speed=Math.min(1,Math.hypot(rig.vx,rig.vy)*view.z/1000);pulse=Math.max(0,pulse-dt*.75);const energy=Math.max(speed,pulse*.65);
+  function drawScene(dt,time){const sceneZoom=view.z*(typeof cameraDolly==='function'?cameraDolly():1);const ctx=fit(scene),cx=innerWidth/2,cy=innerHeight/2;const speed=Math.min(1,Math.hypot(rig.vx,rig.vy)*view.z/1000);pulse=Math.max(0,pulse-dt*.75);const energy=Math.max(speed,pulse*.65);
     const parallaxX=((view.x*.22)%3200+3200)%3200,parallaxY=((view.y*.22)%2200+2200)%2200;
     for(const s of stars){if(!minimal)s.z-=dt*(14+energy*150);if(s.z<40)s.z+=1700;const k=650/(s.z+350),x=((((s.x-parallaxX)+1600)%3200+3200)%3200-1600)*k+cx,y=((((s.y-parallaxY)+1100)%2200+2200)%2200-1100)*k+cy;const trail=minimal?0:energy*12*k;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+rig.vx*view.z*.0008*k+trail*(x-cx)/innerWidth,y+rig.vy*view.z*.0008*k+trail*(y-cy)/innerHeight);ctx.strokeStyle=`rgba(113,239,223,${.1+k*.4})`;ctx.lineWidth=Math.max(.5,k);ctx.stroke()}
     const horizon=innerHeight*.72;ctx.strokeStyle='#2c757b30';ctx.lineWidth=.7;const scroll=((view.x*.05)%80+80)%80;
     for(let i=-12;i<=12;i++){ctx.beginPath();ctx.moveTo(cx+(i*80-scroll)*.2,horizon);ctx.lineTo(cx+(i*80-scroll)*2.2,innerHeight);ctx.stroke()}
     for(let i=0;i<8;i++){const f=(i+((view.y*.001)%1+1)%1)/8;const y=horizon+f*f*(innerHeight-horizon);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(innerWidth,y);ctx.stroke()}
     const yaw=minimal?0:Math.max(-7,Math.min(7,-rig.vx*view.z*.01)),pitch=minimal?0:Math.max(-5,Math.min(5,rig.vy*view.z*.008));
-    document.getElementById('world').style.transform=`perspective(1400px) rotateX(${pitch}deg) rotateY(${yaw}deg) translate(${-view.x*view.z}px,${-view.y*view.z}px) scale(${view.z})`;
+    document.getElementById('world').style.transform=`perspective(1400px) rotateX(${pitch}deg) rotateY(${yaw}deg) translate(${-view.x*sceneZoom}px,${-view.y*sceneZoom}px) scale(${sceneZoom})`;
     panels.forEach((panel,i)=>{const p=positions[i],distance=Math.hypot(p.x-view.x,p.y-view.y);const near=distance<360;const drift=minimal?0:Math.sin(time*.55+i)*3;const side=i===1?7:i===2?-7:0;panel.style.setProperty('transform',`perspective(1800px) translate3d(${yaw*(i-2)*.6}px,${drift}px,0) rotateY(${side+yaw*.35}deg) rotateX(${pitch*.3}deg)`,'important');panel.classList.toggle('aiLocked',near&&energy<.3);panel.style.setProperty('--energy',energy.toFixed(3))});
     hud.classList.toggle('vectorActive',energy>.08);hud.querySelector('.vectorMode').textContent=energy>.08?'NAVIGATION / '+vector:'SPATIAL CORE / STABLE';hud.querySelector('.vectorDetail').textContent=energy>.08?'VECTOR TRACKING · '+Math.round(energy*100)+'%':'POSITION LOCKED';hud.style.setProperty('--pulse',energy.toFixed(3));
     document.body.style.setProperty('--flight',energy.toFixed(3));
