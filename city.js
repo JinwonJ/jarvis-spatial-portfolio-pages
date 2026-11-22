@@ -3,9 +3,9 @@ const cityScene=(()=>{
   let seed=8247;
   const random=()=>{seed=(seed*16807)%2147483647;return(seed-1)/2147483646};
   const blocks=[];let distance=0;
-  for(let row=0;row<13;row++)for(let lane=0;lane<10;lane++){
-    const width=110+random()*90,depth=120+random()*90,height=40+random()*105+(random()>.88?95:0);
-    blocks.push({x:(lane-4.5)*280+random()*20,z:100+row*300+random()*30,width,depth,height,seed:random()*1000,spire:random()>.7,warm:random()>.8});
+  for(let row=0;row<13;row++)for(let lane=0;lane<20;lane++){
+    const tier=random(); const width=95+random()*110,depth=105+random()*105,height=tier<.40?25+random()*65:tier<.77?105+random()*125:tier<.95?270+random()*170:480+random()*160;
+    blocks.push({x:(lane-9.5)*280+random()*20,z:100+row*300+random()*30,width,depth,height,seed:random()*1000,spire:random()>.7,warm:random()>.8});
   }
   function draw(ctx,dt,energy,time){
     const reducedCity=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -19,9 +19,9 @@ const cityScene=(()=>{
     function face(points,fill,edge){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.fillStyle=fill;ctx.fill();ctx.strokeStyle=edge;ctx.lineWidth=.65;ctx.stroke()}
     const haze=ctx.createRadialGradient(cx,cy,10,cx,cy,width*.7);haze.addColorStop(0,'#1e68642b');haze.addColorStop(.45,'#134c5513');haze.addColorStop(1,'#06141a00');ctx.fillStyle=haze;ctx.fillRect(0,0,width,height);
     // A visible ground plane, street blocks and shadows anchor every building.
-    face([project(-1650,0,0),project(1650,0,0),project(1650,0,4100),project(-1650,0,4100)],'#081a22','#38555b66');
-    for(let col=0;col<10;col++)for(let row=0;row<14;row++){
-      const x=(col-4.5)*280,z=30+((row*300-distance%300+4200)%4200);
+    face([project(-3150,0,0),project(3150,0,0),project(3150,0,4100),project(-3150,0,4100)],'#081a22','#38555b66');
+    for(let col=0;col<20;col++)for(let row=0;row<14;row++){
+      const x=(col-9.5)*280,z=30+((row*300-distance%300+4200)%4200);
       face([project(x-120,1,z),project(x+120,1,z),project(x+120,1,z+245),project(x-120,1,z+245)],'#12272f','#46616b55');
     }
     blocks.forEach(b=>{b.z-=advance;if(b.z<30)b.z+=3900});
@@ -56,10 +56,10 @@ const cityScene=(()=>{
     // Road network across the oblique aerial map.
     ctx.strokeStyle='#71858a55';ctx.lineWidth=.8;
     function road(x0,z0,x1,z1){const a=project(x0,0,z0),b=project(x1,0,z1);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}
-    for(let col=-1;col<=10;col++){const x=(col-4.5)*280-65;road(x,50,x,3930)}
-    for(let row=0;row<14;row++){const z=40+((row*300-distance%300+4200)%4200);road(-1550,z,1550,z)}
+    for(let col=-1;col<=20;col++){const x=(col-9.5)*280-65;road(x,50,x,3930)}
+    for(let row=0;row<14;row++){const z=40+((row*300-distance%300+4200)%4200);road(-3000,z,3000,z)}
     for(let i=0;i<15;i++){
-      const z=50+((i*271-distance*(i%2?1.5:-1.5)+39000)%3850),lane=((i%10)-4.5)*280-65;
+      const z=50+((i*271-distance*(i%2?1.5:-1.5)+39000)%3850),lane=((i%20)-9.5)*280-65;
       const a=project(lane,5,z),b=project(lane,5,z+16);
       ctx.strokeStyle=i%3?'#a2cacb90':'#d0b47790';ctx.lineWidth=Math.max(.8,3*a.k);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
     }
